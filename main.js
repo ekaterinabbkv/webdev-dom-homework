@@ -1,3 +1,4 @@
+import { getComments, postComment } from "./api.js";
 let commentsArr = [
     
   ];
@@ -14,17 +15,7 @@ let commentsArr = [
 
   loading.textContent = 'Комментарии загружаются...';
   const fetchGet = () => { 
-    return fetch("https://wedev-api.sky.pro/api/v1/ekaterinabbkv/comments", {
-      method: "GET"
-    })
-
-    // подписываемся на успешное завершение запроса с помощью then
-    .then((response) => {
-      // Запускаем преобразовываем "сырые" данные от API в json формат
-      return response.json();
-    })
-      // Подписываемся на результат преобразования
-      .then((responseData) => {
+    getComments().then((responseData) => {
         const appComments = responseData.comments.map((comment) => {
           return {
             name: comment.author.name,
@@ -34,9 +25,6 @@ let commentsArr = [
             myLike: false,
           }
         })
-        // получили данные и рендерим их в приложении
-        //console.log(responseData);
-        // comment = responseData.comment;
         commentsArr = appComments;
         loading.textContent = '';
         renderComments();
@@ -154,35 +142,12 @@ delay(2000).then(() => {
     loadingForm.textContent = 'Комментарий добавляется...';
     // подписываемся на успешное завершение запроса с помощью then
   const post = (text) => {
-    fetch("https://wedev-api.sky.pro/api/v1/ekaterinabbkv/comments", {
-        method: "POST",
-        body: JSON.stringify({
-          name: nameInputElement.value,
-          text: commentInputElement.value,
-          forceError: true,
-        }),        
-      })
-      .then((response) => {        
-        if (response.status === 201) {
-          return response.json();
-        }  
-        else if (response.status === 400){
-        alert("Мало символов");
-        if (nameInputElement.value.length < 3) {
-          nameInputElement.classList.add("color");
-        }
-        if (commentInputElement.value.length < 3) {
-          commentInputElement.classList.add("color");
-        }
-        return Promise.reject(new Error("Не верный пользовательский ввод"));        
-        }
-        else {
-        return Promise.reject(new Error("Ошибка сервера"));
-        }
-      })
+    postComment({
+      name: nameInputElement.value,
+      text: commentInputElement.value,
+    })
       .then((responseData) => {
-        fetchGet();
-        
+        fetchGet();        
       })
       .then(() => {
         loadingForm.textContent = '';
