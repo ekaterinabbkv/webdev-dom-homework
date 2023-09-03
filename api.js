@@ -18,21 +18,18 @@ export function postComment({ name, text }) {
       })
       .then((response) => {        
         if (response.status === 201) {
-          return response.json();
+            return response.json();
         }  
-        else if (response.status === 400){
-        alert("Мало символов");
-       /* if (name.length < 3) {
-          name.classList.add("color");
+        if (response.status === 400){
+            throw new Error("Мало символов");  
+       //return Promise.reject(new Error("Не верный пользовательский ввод"));        
         }
-        if (text.length < 3) {
-          text.classList.add("color");
-        }*/
-        return Promise.reject(new Error("Не верный пользовательский ввод"));        
+        if (response.status === 500){
+            throw new Error("Ошибка сервера");                      
         }
-        else {
+        /*else {
         alert("Что-то пошло не так");
         return Promise.reject(new Error("Ошибка сервера"));
-        }
+        }*/
       });
 }

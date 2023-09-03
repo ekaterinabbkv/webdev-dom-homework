@@ -136,7 +136,7 @@ delay(2000).then(() => {
     let month = plusZero(currentDate.getMonth() + 1);
     return `${date}.${month}.${currentDate.getFullYear() % 100} ${hours}:${minute}`;
   }
-  let currentDate = new Date();
+  
 
   
 
@@ -144,12 +144,12 @@ delay(2000).then(() => {
     form.classList.add('none');
     loadingForm.textContent = 'Комментарий добавляется...';
     // подписываемся на успешное завершение запроса с помощью then
-  //const post = (text) => {
+  const post = (text) => {
     postComment({
       name: nameInputElement.value,
       text: commentInputElement.value,
     })
-      .then((responseData) => {
+      .then(() => {
         fetchGet();        
       })
       .then(() => {
@@ -160,14 +160,24 @@ delay(2000).then(() => {
       })
       .catch((error) => {
         console.warn(error);
+        if (error.message === "Неверный запрос") {
+          alert("Мало символов");
+        }
+        if (error.message === "Ошибка сервера") {
+          alert("Сервер сломался, попробуйте позже");
+          post(text);
+        }
+        if (window.navigator.onLine === false) {
+          alert("Проблемы с интернетом, проверьте подключение");
+        }
         loadingForm.textContent = '';
         form.classList.remove('none');
-        //post(text);        
+               
       })
     }
-    //post();    
+    post();    
     renderComments();
-   // };
+    };
         
 
   buttonElement.addEventListener("click", () => {
