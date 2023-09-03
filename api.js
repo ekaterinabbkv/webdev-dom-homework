@@ -21,15 +21,10 @@ export function postComment({ name, text }) {
             return response.json();
         }  
         if (response.status === 400){
-            throw new Error("Мало символов");  
-       //return Promise.reject(new Error("Не верный пользовательский ввод"));        
+            throw new Error("Мало символов");        
         }
         if (response.status === 500){
             throw new Error("Ошибка сервера");                      
-        }
-        /*else {
-        alert("Что-то пошло не так");
-        return Promise.reject(new Error("Ошибка сервера"));
-        }*/
+        }        
       });
 }

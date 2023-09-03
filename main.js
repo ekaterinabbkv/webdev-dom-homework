@@ -12,7 +12,7 @@ let commentsArr = [
   const loading = document.getElementById("loading");
   const form = document.getElementById('add-form');
   const delFormBtn = document.querySelector(".del-form-button");
-  const listElement = document.getElementById('list');
+  //const listElement = document.getElementById('list');
   const nameInputElement = document.getElementById('name-input');
   const commentInputElement = document.getElementById('comment-input');
 
@@ -48,7 +48,17 @@ let commentsArr = [
         }, interval);
       });
 }
-delay(2000).then(() => {
+   
+  const commentBodies = document.querySelectorAll(".comment-body");
+  for (const commentBody of commentBodies) {
+    commentBody.addEventListener('click', () => {
+      const oldComment = commentBody.dataset.text;
+      const oldName = commentBody.dataset.name;
+      commentInputElement.value += `${oldComment}\n${oldName}`;
+    })
+  }
+
+  delay(2000).then(() => {
     const newLike = commentsArr[likeButton.dataset.index];
     newLike.likes = newLike.isLiked
       ? newLike.likes - 1
@@ -84,17 +94,7 @@ delay(2000).then(() => {
   if (!commentsArr) delFormBtn.disabled = true;
 });
 
-  const replyToComment = () => {
-    const commentBodies = document.querySelectorAll(".comment-body");
-    for (const commentBody of commentBodies) {
-      commentBody.addEventListener('click', () => {
-        const oldComment = commentBody.dataset.text;
-        const oldName = commentBody.dataset.name;
-        commentInputElement.value += `${oldComment}\n${oldName}`;
-      })
-    }
-
-  }
+  
 
   const renderComments = () => {
     comments.innerHTML = commentsArr
@@ -121,7 +121,6 @@ delay(2000).then(() => {
     
     buttonElement.disabled = true;
     initEventListeners();
-    replyToComment();
   }
   renderComments();
 
@@ -136,8 +135,6 @@ delay(2000).then(() => {
     let month = plusZero(currentDate.getMonth() + 1);
     return `${date}.${month}.${currentDate.getFullYear() % 100} ${hours}:${minute}`;
   }
-  
-
   
 
   const createNewComment = () => {
