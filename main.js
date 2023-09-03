@@ -1,4 +1,7 @@
-import { getComments, postComment } from "./api.js";
+import { getComments } from "./api.js";
+import { postComment } from "./api.js";
+
+
 let commentsArr = [
     
   ];
@@ -141,7 +144,7 @@ delay(2000).then(() => {
     form.classList.add('none');
     loadingForm.textContent = 'Комментарий добавляется...';
     // подписываемся на успешное завершение запроса с помощью then
-  const post = (text) => {
+  //const post = (text) => {
     postComment({
       name: nameInputElement.value,
       text: commentInputElement.value,
@@ -156,14 +159,15 @@ delay(2000).then(() => {
         nameInputElement.value = "";
       })
       .catch((error) => {
+        console.warn(error);
         loadingForm.textContent = '';
         form.classList.remove('none');
-        post(text);
+        //post(text);        
       })
     }
-    post();    
+    //post();    
     renderComments();
-    };
+   // };
         
 
   buttonElement.addEventListener("click", () => {

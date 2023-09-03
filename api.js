@@ -7,12 +7,12 @@ export function getComments() {
   });  
 }  
 
-export function postComment(name, comment) {
+export function postComment({ name, text }) {
     return fetch("https://wedev-api.sky.pro/api/v1/ekaterinabbkv/comments", {
         method: "POST",
         body: JSON.stringify({
           name: name,
-          text: comment,
+          text: text,
           forceError: true,
         }),        
       })
@@ -22,15 +22,16 @@ export function postComment(name, comment) {
         }  
         else if (response.status === 400){
         alert("Мало символов");
-        if (nameInputElement.value.length < 3) {
-          nameInputElement.classList.add("color");
+       /* if (name.length < 3) {
+          name.classList.add("color");
         }
-        if (commentInputElement.value.length < 3) {
-          commentInputElement.classList.add("color");
-        }
+        if (text.length < 3) {
+          text.classList.add("color");
+        }*/
         return Promise.reject(new Error("Не верный пользовательский ввод"));        
         }
         else {
+        alert("Что-то пошло не так");
         return Promise.reject(new Error("Ошибка сервера"));
         }
       });
