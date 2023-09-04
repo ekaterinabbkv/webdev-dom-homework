@@ -1,15 +1,14 @@
 import { getComments } from "./api.js";
 import { postComment } from "./api.js";
+import { renderComments } from "./renderComments.js"
 
 let commentsArr = [];
 
-const comments = document.querySelector(".comments");
 const buttonElement = document.getElementById("add-button");
 const loadingForm = document.getElementById("loadingForm");
 const loading = document.getElementById("loading");
 const form = document.getElementById("add-form");
 const delFormBtn = document.querySelector(".del-form-button");
-//const listElement = document.getElementById('list');
 const nameInputElement = document.getElementById("name-input");
 const commentInputElement = document.getElementById("comment-input");
 
@@ -27,44 +26,11 @@ const fetchGet = () => {
     });
     commentsArr = appComments;
     loading.textContent = "";
-    renderComments();
+    renderComments({ commentsArr });
   });
 };
 fetchGet();
 
-const initEventListeners = () => {
-  const likeButtons = document.querySelectorAll(".like-button");
-
-  for (const likeButton of likeButtons) {
-    likeButton.addEventListener("click", () => {
-      likeButton.classList.add("-loading-like");
-      function delay(interval = 300) {
-        return new Promise((resolve) => {
-          setTimeout(() => {
-            resolve();
-          }, interval);
-        });
-      }
-
-      const commentBodies = document.querySelectorAll(".comment-body");
-      for (const commentBody of commentBodies) {
-        commentBody.addEventListener("click", () => {
-          const oldComment = commentBody.dataset.text;
-          const oldName = commentBody.dataset.name;
-          commentInputElement.value += `${oldComment}\n${oldName}`;
-        });
-      }
-
-      delay(2000).then(() => {
-        const newLike = commentsArr[likeButton.dataset.index];
-        newLike.likes = newLike.isLiked ? newLike.likes - 1 : newLike.likes + 1;
-        newLike.isLiked = !newLike.isLiked;
-        newLike.isLikeLoading = false;
-        renderComments();
-      });
-    });
-  }
-};
 buttonElement.disabled = true;
 
 document.addEventListener("input", () => {
@@ -79,47 +45,18 @@ document.addEventListener("keyup", (e) => {
     !buttonElement.disabled
   ) {
     createNewComment();
-    renderComments();
+    renderComments({ commentsArr });
   }
 });
 
 delFormBtn.addEventListener("click", () => {
   commentsArr.pop();
-  renderComments();
+  renderComments({ commentsArr });
   if (!commentsArr) delFormBtn.disabled = true;
 });
 
-const renderComments = () => {
-  comments.innerHTML = commentsArr
-    .map((comment, index) => {
-      return `<li class="comment">
-          <div class="comment-header">
-            <div>${comment.name}</div>
-            <div>${comment.date}</div>
-          </div>
-          <div class="comment-body" data-text = "${
-            comment.text
-          }" data-name = "${comment.name}">
-            <div class="comment-text">
-              ${comment.text}
-            </div>
-          </div>
-          <div class="comment-footer">
-            <div class="likes">
-              <span class="likes-counter">${comment.likes}</span>
-              <button data-index = '${index}' class="${
-        comment.isLiked ? "like-button -active-like" : "like-button"
-      }"></button>
-            </div>
-          </div>
-        </li>`;
-    })
-    .join("");
 
-  buttonElement.disabled = true;
-  initEventListeners();
-};
-renderComments();
+//renderComments({ commentsArr });
 
 const plusZero = (str) => {
   return str < 10 ? `0${str}` : str;
@@ -170,12 +107,12 @@ const createNewComment = () => {
       });
   };
   post();
-  renderComments();
+  renderComments({ commentsArr });
 };
 
 buttonElement.addEventListener("click", () => {
   createNewComment();
-  renderComments();
+  renderComments({ commentsArr });
 });
 
 console.log("It works!");
