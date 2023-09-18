@@ -1,181 +1,87 @@
-import { getComments } from "./api.js";
-import { postComment } from "./api.js";
+import { getTodos } from './api.js';
+import { now } from './date.js';
+import { renderComments } from './render.js';
+import { format } from "date-fns";
 
-let commentsArr = [];
-
-const comments = document.querySelector(".comments");
-const buttonElement = document.getElementById("add-button");
-const loadingForm = document.getElementById("loadingForm");
 const loading = document.getElementById("loading");
-const form = document.getElementById("add-form");
-const delFormBtn = document.querySelector(".del-form-button");
-//const listElement = document.getElementById('list');
-const nameInputElement = document.getElementById("name-input");
-const commentInputElement = document.getElementById("comment-input");
+//const loadingForm = document.getElementById("loadingForm");
+//const addFormButtonElement = document.getElementById("add-form-button");
+// const nameInputElement = document.getElementById("add-form-name");
+// const textInputElement = document.getElementById("add-form-text");
+// const form = document.getElementById("add-form");
+// const deleteCommentButton = document.getElementById("delete-comment-button");
+let quote = "";
+let currentDate = new Date();
+
+now(currentDate);
+
+let comments = [
+];
 
 loading.textContent = "Комментарии загружаются...";
-const fetchGet = () => {
-  getComments().then((responseData) => {
+
+ export const fetchGet = () => {
+  getTodos().then((responseData) => {
     const appComments = responseData.comments.map((comment) => {
       return {
         name: comment.author.name,
-        date: now(new Date(comment.date)),
+        date: format(new Date(comment.date), `yyyy-MM-dd hh.mm.ss`),
         text: comment.text,
         likes: 0,
-        myLike: false,
-      };
-    });
-    commentsArr = appComments;
+        isLiked: false,
+        changeButton: false,
+      }
+    })
     loading.textContent = "";
-    renderComments();
+    comments = appComments;
+    renderAllComments();
   });
 };
+
 fetchGet();
 
-const initEventListeners = () => {
+const clickLike = () => {
   const likeButtons = document.querySelectorAll(".like-button");
-
   for (const likeButton of likeButtons) {
-    likeButton.addEventListener("click", () => {
-      likeButton.classList.add("-loading-like");
+    likeButton.addEventListener('click', () => {
+      likeButton.classList.add('-loading-like');
       function delay(interval = 300) {
         return new Promise((resolve) => {
           setTimeout(() => {
             resolve();
           }, interval);
         });
-      }
-
-      const commentBodies = document.querySelectorAll(".comment-body");
-      for (const commentBody of commentBodies) {
-        commentBody.addEventListener("click", () => {
-          const oldComment = commentBody.dataset.text;
-          const oldName = commentBody.dataset.name;
-          commentInputElement.value += `${oldComment}\n${oldName}`;
-        });
-      }
-
+      };
       delay(2000).then(() => {
-        const newLike = commentsArr[likeButton.dataset.index];
-        newLike.likes = newLike.isLiked ? newLike.likes - 1 : newLike.likes + 1;
+        const newLike = comments[likeButton.dataset.index];
+        newLike.likes = newLike.isLiked
+          ? newLike.likes - 1
+          : newLike.likes + 1;
         newLike.isLiked = !newLike.isLiked;
-        newLike.isLikeLoading = false;
-        renderComments();
+        // newLike.isLikeLoading = false;
+        renderAllComments();
       });
-    });
+    })
   }
 };
-buttonElement.disabled = true;
 
-document.addEventListener("input", () => {
-  nameInputElement.value != "" && commentInputElement.value != ""
-    ? (buttonElement.disabled = false)
-    : (buttonElement.disabled = true);
-});
+const replyToComment = () => {
+  const commentBodys = document.querySelectorAll(".comment-body");
+  for (const commentBody of commentBodys) {
+    commentBody.addEventListener('click', () => {
+      const oldComment = commentBody.dataset.text;
+      const oldName = commentBody.dataset.name;
+      const quote = `${oldComment}\n${oldName}: `;
+      textInputElement.value += `"${quote}"\n`;
 
-document.addEventListener("keyup", (e) => {
-  if (
-    (e.code === "Enter" || e.code === "NumpadEnter") &&
-    !buttonElement.disabled
-  ) {
-    createNewComment();
-    renderComments();
+    })
   }
-});
-
-delFormBtn.addEventListener("click", () => {
-  commentsArr.pop();
-  renderComments();
-  if (!commentsArr) delFormBtn.disabled = true;
-});
-
-const renderComments = () => {
-  comments.innerHTML = commentsArr
-    .map((comment, index) => {
-      return `<li class="comment">
-          <div class="comment-header">
-            <div>${comment.name}</div>
-            <div>${comment.date}</div>
-          </div>
-          <div class="comment-body" data-text = "${
-            comment.text
-          }" data-name = "${comment.name}">
-            <div class="comment-text">
-              ${comment.text}
-            </div>
-          </div>
-          <div class="comment-footer">
-            <div class="likes">
-              <span class="likes-counter">${comment.likes}</span>
-              <button data-index = '${index}' class="${
-        comment.isLiked ? "like-button -active-like" : "like-button"
-      }"></button>
-            </div>
-          </div>
-        </li>`;
-    })
-    .join("");
-
-  buttonElement.disabled = true;
-  initEventListeners();
-};
-renderComments();
-
-const plusZero = (str) => {
-  return str < 10 ? `0${str}` : str;
 };
 
-const now = (currentDate) => {
-  let minute = plusZero(currentDate.getMinutes());
-  let hours = plusZero(currentDate.getHours());
-  let date = plusZero(currentDate.getDate());
-  let month = plusZero(currentDate.getMonth() + 1);
-  return `${date}.${month}.${
-    currentDate.getFullYear() % 100
-  } ${hours}:${minute}`;
-};
+ export const renderAllComments = () => {
+  renderComments({ comments });
+  clickLike();
+  replyToComment();
+}
 
-const createNewComment = () => {
-  form.classList.add("none");
-  loadingForm.textContent = "Комментарий добавляется...";
-  // подписываемся на успешное завершение запроса с помощью then
-  const post = (text) => {
-    postComment({
-      name: nameInputElement.value,
-      text: commentInputElement.value,
-    })
-      .then(() => {
-        fetchGet();
-      })
-      .then(() => {
-        loadingForm.textContent = "";
-        form.classList.remove("none");
-        commentInputElement.value = "";
-        nameInputElement.value = "";
-      })
-      .catch((error) => {
-        console.warn(error);
-        if (error.message === "Неверный запрос") {
-          alert("Мало символов");
-        }
-        if (error.message === "Ошибка сервера") {
-          alert("Сервер сломался, попробуйте позже");
-          post(text);
-        }
-        if (window.navigator.onLine === false) {
-          alert("Проблемы с интернетом, проверьте подключение");
-        }
-        loadingForm.textContent = "";
-        form.classList.remove("none");
-      });
-  };
-  post();
-  renderComments();
-};
-
-buttonElement.addEventListener("click", () => {
-  createNewComment();
-  renderComments();
-});
-
-console.log("It works!");
+renderAllComments();
